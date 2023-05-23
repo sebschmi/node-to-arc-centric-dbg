@@ -1,7 +1,7 @@
-use std::path::PathBuf;
 use clap::Parser;
 use log::{info, LevelFilter};
-use simplelog::{ColorChoice, CombinedLogger, Config, TerminalMode, TermLogger};
+use simplelog::{ColorChoice, CombinedLogger, Config, TermLogger, TerminalMode};
+use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
 struct Cli {
@@ -18,7 +18,6 @@ struct Cli {
     log_level: LevelFilter,
 }
 
-
 pub fn initialise_logging(log_level: LevelFilter) {
     CombinedLogger::init(vec![TermLogger::new(
         log_level,
@@ -26,7 +25,7 @@ pub fn initialise_logging(log_level: LevelFilter) {
         TerminalMode::Mixed,
         ColorChoice::Auto,
     )])
-        .unwrap();
+    .unwrap();
 
     info!("Logging initialised successfully");
 }
