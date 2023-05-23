@@ -6,6 +6,7 @@ license = "BSD-2-Clause"
 authors = ["Sebastian Schmidt <isibboi@gmail.com>"]
 description = "Convert node-centric de Bruijn graphs as output by BCALM2 into arc-centric de Bruijn graphs as edge lists"
 repository = "https://github.com/sebschmi/node-to-arc-centric-dbg"
+rust-version = "1.64.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
