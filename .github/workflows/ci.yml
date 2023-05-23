@@ -34,7 +34,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all --bins --examples --lib
+          args: --all --bins --examples
 
   precheck_all_features:
     name: Check all features
@@ -62,7 +62,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests
 
   check_msrv:
     needs: [precheck_default, precheck_all_features]
@@ -85,7 +85,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all-features --all --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests
 
   check_benches:
     needs: [precheck_default, precheck_all_features]
@@ -114,7 +114,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
-          args: --all-features --all --bins --benches --examples --tests --lib
+          args: --all-features --all --bins --benches --examples --tests
 
   check_platform_compatibility:
     needs: [precheck_default, precheck_all_features]
@@ -144,7 +144,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests
 
   detailed_tests:
     needs: [precheck_default, precheck_all_features]
@@ -175,7 +175,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command:  check
-          args: --all-features --all --bins --examples --tests --lib
+          args: --all-features --all --bins --examples --tests
 
       - name: Test
         uses: actions-rs/cargo@v1
@@ -199,4 +199,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-features --bins --examples --tests --lib
+          args: --all-features --bins --examples --tests
