@@ -9,3 +9,5 @@ edition = "2021"
 clap = { version = "4.2.5", features = ["derive"] }
 log = "0.4.17"
 simplelog = "0.12.1"
+genome-graph = "5.2.0"
+anyhow = "1.0.71"
