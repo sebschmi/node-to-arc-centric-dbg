@@ -6,6 +6,7 @@ use genome_graph::bigraph::traitgraph::interface::{
 use genome_graph::bigraph::traitgraph::traitsequence::interface::Sequence;
 use genome_graph::compact_genome::implementation::DefaultSequenceStore;
 use genome_graph::compact_genome::interface::alphabet::dna_alphabet::DnaAlphabet;
+use genome_graph::compact_genome::interface::sequence::GenomeSequence;
 use genome_graph::compact_genome::interface::sequence_store::SequenceStore;
 use genome_graph::io::bcalm2::read_bigraph_from_bcalm2_as_edge_centric_from_file;
 use genome_graph::types::PetBCalm2EdgeGraph;
@@ -52,11 +53,13 @@ fn main() {
     let cli = Cli::parse();
     initialise_logging(cli.log_level);
 
+    info!("Loading graph from {:?} with k = {}", cli.input, cli.k);
     let mut sequence_store = DefaultSequenceStore::<DnaAlphabet>::new();
     let graph: PetBCalm2EdgeGraph<_> =
         read_bigraph_from_bcalm2_as_edge_centric_from_file(&cli.input, &mut sequence_store, cli.k)
             .unwrap();
 
+    info!("Writing graph to {:?}", cli.output);
     let mut output = BufWriter::new(File::create(&cli.output).unwrap());
     writeln!(output, "{}", graph.node_count()).unwrap();
     for n1 in graph.node_indices() {
@@ -71,7 +74,12 @@ fn main() {
             let edge_data = graph.edge_data(edge_id);
             let kmer_count = edge_data.length - (cli.k - 1);
             if edge_data.total_abundance % kmer_count != 0 {
-                warn!("Found edge with non-integer average abundance");
+                let sequence = sequence_store.get(&edge_data.sequence_handle);
+                let sequence = &sequence[..(cli.k + 10).min(sequence.len())];
+                warn!(
+                    "Found edge with non-integer average abundance: {}",
+                    sequence.as_string()
+                );
             }
 
             let n1 = n1.as_usize();
@@ -87,5 +95,5 @@ fn main() {
         }
     }
 
-    println!("Hello, world!");
+    info!("Success!");
 }
