@@ -72,12 +72,33 @@ fn output_arc_centric_dbg(
         let mut neighbors: Vec<_> = graph.out_neighbors(n1).collect();
         neighbors.sort_unstable_by_key(|neighbor| neighbor.node_id);
 
-        for Neighbor {
+        let mut n2_iterator = neighbors.iter().peekable();
+        while let Some(Neighbor {
             node_id: n2,
             edge_id,
-        } in neighbors
+        }) = n2_iterator.next().cloned()
         {
             let edge_data = graph.edge_data(edge_id);
+
+            let weight_multiplier = if let Some(Neighbor {
+                node_id: next_n2,
+                edge_id: next_edge_id,
+            }) = n2_iterator.peek()
+            {
+                let next_edge_data = graph.edge_data(*next_edge_id);
+                if n2 == *next_n2
+                    && sequence_store.get(&edge_data.sequence_handle)
+                        == sequence_store.get(&next_edge_data.sequence_handle)
+                {
+                    n2_iterator.next().unwrap();
+                    2
+                } else {
+                    1
+                }
+            } else {
+                1
+            };
+
             let kmer_count = edge_data.length - (k - 1);
             if edge_data.total_abundance % kmer_count != 0 {
                 let sequence = sequence_store.get(&edge_data.sequence_handle);
@@ -90,7 +111,7 @@ fn output_arc_centric_dbg(
 
             let n1 = n1.as_usize();
             let n2 = n2.as_usize();
-            let weight = edge_data.total_abundance / kmer_count;
+            let weight = edge_data.total_abundance / kmer_count * weight_multiplier;
             write!(output, "{n1} {n2} {weight} ").unwrap();
 
             let sequence = sequence_store.get(&edge_data.sequence_handle);
@@ -143,11 +164,9 @@ CGATCGATCGATCAGT"
         );
 
         let expected = "6
-0 1 21 ATCGATCGATCGAT
-0 1 21 ATCGATCGATCGAT
+0 1 42 ATCGATCGATCGAT
 1 2 43 TCGATCGATCGATC
-2 3 20 CGATCGATCGATCG
-2 3 20 CGATCGATCGATCG
+2 3 40 CGATCGATCGATCG
 2 4 1 CGATCGATCGATCAGT
 3 0 43 GATCGATCGATCGA
 5 3 1 ACTGATCGATCGATCG
@@ -179,17 +198,14 @@ CGATCGATCGATCTCGATCGATCGAT"
         );
 
         let expected = "6
-0 1 20 CGATCGATCGATCG
-0 1 20 CGATCGATCGATCG
+0 1 40 CGATCGATCGATCG
 0 2 1 CGATCGATCGATCTCGATCGATCGAT
 0 4 2 CGATCGATCGATCA
 1 3 43 GATCGATCGATCGA
 2 0 43 TCGATCGATCGATC
 3 1 1 ATCGATCGATCGAGATCGATCGATCG
-3 2 21 ATCGATCGATCGAT
-3 2 21 ATCGATCGATCGAT
-4 5 1 GATCGATCGATCACTGATCGATCGATC
-4 5 1 GATCGATCGATCAGTGATCGATCGATC
+3 2 42 ATCGATCGATCGAT
+4 5 2 GATCGATCGATCACTGATCGATCGATC
 5 1 2 TGATCGATCGATCG
 ";
 
