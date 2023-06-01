@@ -1,4 +1,5 @@
 use clap::Parser;
+use genome_graph::bigraph::interface::static_bigraph::StaticEdgeCentricBigraph;
 use genome_graph::bigraph::traitgraph::index::GraphIndex;
 use genome_graph::bigraph::traitgraph::interface::{
     ImmutableGraphContainer, NavigableGraph, Neighbor,
@@ -87,9 +88,12 @@ fn output_arc_centric_dbg(
             {
                 let next_edge_data = graph.edge_data(*next_edge_id);
                 if n2 == *next_n2
-                    && sequence_store.get(&edge_data.sequence_handle)
-                        == sequence_store.get(&next_edge_data.sequence_handle)
+                    && graph.mirror_edge_edge_centric(edge_id).unwrap() == *next_edge_id
                 {
+                    assert_eq!(
+                        sequence_store.get(&edge_data.sequence_handle),
+                        sequence_store.get(&next_edge_data.sequence_handle)
+                    );
                     n2_iterator.next().unwrap();
                     2
                 } else {
