@@ -1,6 +1,6 @@
 [package]
 name = "node-to-arc-centric-dbg"
-version = "1.0.0"
+version = "2.0.0"
 edition = "2021"
 license = "BSD-2-Clause"
 authors = ["Sebastian Schmidt <isibboi@gmail.com>"]
