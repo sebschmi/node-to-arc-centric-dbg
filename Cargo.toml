@@ -11,8 +11,8 @@ rust-version = "1.65.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = { version = "4.2.5", features = ["derive"] }
-log = "0.4.17"
+clap = { version = "4.3.4", features = ["derive"] }
+log = "0.4.19"
 simplelog = "0.12.1"
-genome-graph = "5.2.0"
+genome-graph = "6.0.0"
 anyhow = "1.0.71"
