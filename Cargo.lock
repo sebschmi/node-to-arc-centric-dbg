@@ -716,7 +716,7 @@ dependencies = [
 
 [[package]]
 name = "node-to-arc-centric-dbg"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "anyhow",
  "clap",
