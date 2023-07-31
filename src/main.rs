@@ -81,6 +81,8 @@ fn output_arc_centric_dbg(
         {
             let edge_data = graph.edge_data(edge_id);
 
+            // if there is a pair of reverse complemental edges with a self-complemental label,
+            // then we merge them, as they represent the same sequence.
             let weight_multiplier = if let Some(Neighbor {
                 node_id: next_n2,
                 edge_id: next_edge_id,
@@ -90,12 +92,31 @@ fn output_arc_centric_dbg(
                 if n2 == *next_n2
                     && graph.mirror_edge_edge_centric(edge_id).unwrap() == *next_edge_id
                 {
-                    assert_eq!(
-                        sequence_store.get(&edge_data.sequence_handle),
-                        sequence_store.get(&next_edge_data.sequence_handle)
-                    );
-                    n2_iterator.next().unwrap();
-                    2
+                    if edge_data.forwards == next_edge_data.forwards {
+                        if sequence_store.get(&edge_data.sequence_handle)
+                            == sequence_store.get(&next_edge_data.sequence_handle)
+                        {
+                            n2_iterator.next().unwrap();
+                            2
+                        } else {
+                            1
+                        }
+                    } else if sequence_store
+                        .get(&edge_data.sequence_handle)
+                        .iter()
+                        .copied()
+                        .zip(
+                            sequence_store
+                                .get(&next_edge_data.sequence_handle)
+                                .reverse_complement_iter(),
+                        )
+                        .all(|(c1, c2)| c1 == c2)
+                    {
+                        n2_iterator.next().unwrap();
+                        2
+                    } else {
+                        1
+                    }
                 } else {
                     1
                 }
@@ -209,12 +230,54 @@ CGATCGATCGATCTCGATCGATCGAT"
 2 0 43 TCGATCGATCGATC
 3 1 1 ATCGATCGATCGAGATCGATCGATCG
 3 2 42 ATCGATCGATCGAT
-4 5 2 GATCGATCGATCACTGATCGATCGATC
+4 5 1 GATCGATCGATCACTGATCGATCGATC
+4 5 1 GATCGATCGATCAGTGATCGATCGATC
 5 1 2 TGATCGATCGATCG
 ";
 
         let mut output = Vec::new();
         node_to_arc_centric_dbg(14, &mut file, &mut output);
+        println!("{}", String::from_utf8(output.clone()).unwrap());
+
+        assert_eq!(expected.as_bytes(), output);
+    }
+
+    #[test]
+    fn test_pseudo_reverse_complemental_arc() {
+        let mut file = BufReader::new(
+            ">0 LN:i:30 KC:i:16 km:f:1.0   L:-:1:-  L:+:1:-
+ATATATATATATGGCACCATATATATATAT
+>1 LN:i:16 KC:i:4 km:f:2.0   L:-:1:+ L:-:2:+  L:+:0:+ L:+:0:-
+ATATATATATATATGG
+>2 LN:i:15 KC:i:1 km:f:1.0   L:+:2:- L:+:4:+  L:-:1:+ L:-:2:+
+ATATATATATATATA
+>3 LN:i:19 KC:i:5 km:f:1.0    L:+:4:-
+ACGGGGGGGGGGACACACA
+>4 LN:i:38 KC:i:29 km:f:1.2   L:-:2:- L:-:4:+  L:+:3:- L:+:5:-
+TATATATATATATAAAAACAACCGTGTGTGTCCCCCCC
+>5 LN:i:19 KC:i:5 km:f:1.0    L:+:4:-
+ATGCTGGGGGGGACACACA
+"
+            .as_bytes(),
+        );
+
+        let expected = "10
+0 1 1 ATATATATATATGGTGCCATATATATATAT
+0 1 1 ATATATATATATGGCACCATATATATATAT
+1 2 2 CCATATATATATATAT
+2 0 2 ATATATATATATATGG
+2 3 1 ATATATATATATATA
+3 2 1 TATATATATATATAT
+3 7 1 TATATATATATATAAAAACAACCGTGTGTGTCCCCCCC
+4 6 1 ACGGGGGGGGGGACACACA
+6 3 1 GGGGGGGACACACACGGTTGTTTTTATATATATATATA
+7 5 1 TGTGTGTCCCCCCCCCCGT
+7 9 1 TGTGTGTCCCCCCCAGCAT
+8 6 1 ATGCTGGGGGGGACACACA
+";
+
+        let mut output = Vec::new();
+        node_to_arc_centric_dbg(15, &mut file, &mut output);
         println!("{}", String::from_utf8(output.clone()).unwrap());
 
         assert_eq!(expected.as_bytes(), output);
