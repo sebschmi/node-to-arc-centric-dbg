@@ -1,3 +1,4 @@
+use crate::memory_meter::MemoryMeter;
 use clap::Parser;
 use genome_graph::bigraph::interface::static_bigraph::StaticEdgeCentricBigraph;
 use genome_graph::bigraph::traitgraph::index::GraphIndex;
@@ -17,6 +18,8 @@ use std::fs::File;
 use std::io::Write;
 use std::io::{BufRead, BufReader, BufWriter};
 use std::path::PathBuf;
+
+mod memory_meter;
 
 #[derive(Parser, Debug)]
 struct Cli {
@@ -155,8 +158,11 @@ fn output_arc_centric_dbg(
 }
 
 fn main() {
+    let mut meter = MemoryMeter::new();
     let cli = Cli::parse();
     initialise_logging(cli.log_level);
+
+    meter.report();
 
     info!(
         "Loading graph from {:?} with k = {} and writing to {:?}",
@@ -165,6 +171,8 @@ fn main() {
     let mut input = BufReader::new(File::open(&cli.input).unwrap());
     let mut output = BufWriter::new(File::create(&cli.output).unwrap());
     node_to_arc_centric_dbg(cli.k, &mut input, &mut output);
+
+    meter.report();
 
     info!("Success!");
 }
