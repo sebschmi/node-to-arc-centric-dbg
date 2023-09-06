@@ -14,5 +14,5 @@ rust-version = "1.65.0"
 clap = { version = "4.3.4", features = ["derive"] }
 log = "0.4.19"
 simplelog = "0.12.1"
-genome-graph = "6.0.0"
+genome-graph = "8.0.0"
 anyhow = "1.0.71"
