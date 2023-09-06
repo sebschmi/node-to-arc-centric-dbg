@@ -3,7 +3,7 @@ use clap::Parser;
 use genome_graph::bigraph::interface::static_bigraph::StaticEdgeCentricBigraph;
 use genome_graph::bigraph::traitgraph::index::GraphIndex;
 use genome_graph::bigraph::traitgraph::interface::{
-    ImmutableGraphContainer, NavigableGraph, Neighbor,
+    Edge, ImmutableGraphContainer, NavigableGraph, Neighbor,
 };
 use genome_graph::bigraph::traitgraph::traitsequence::interface::Sequence;
 use genome_graph::compact_genome::implementation::DefaultSequenceStore;
@@ -155,10 +155,17 @@ fn output_arc_centric_dbg(
                 );
             }
 
+            let mirror_edge = graph.mirror_edge_edge_centric(edge_id).unwrap();
+            let Edge {
+                from_node: mirror_n1,
+                to_node: mirror_n2,
+            } = graph.edge_endpoints(mirror_edge);
             let n1 = n1.as_usize();
             let n2 = n2.as_usize();
+            let mirror_n1 = mirror_n1.as_usize();
+            let mirror_n2 = mirror_n2.as_usize();
             let weight = edge_data.total_abundance / kmer_count * weight_multiplier;
-            write!(output, "{n1} {n2} {weight} ").unwrap();
+            write!(output, "{n1} {n2} {weight} {mirror_n1} {mirror_n2} ").unwrap();
 
             let sequence = sequence_store.get(&edge_data.sequence_handle);
             if edge_data.forwards {
@@ -311,7 +318,7 @@ ATGCTGGGGGGGACACACA
 
     #[test]
     fn test_bcalm2_multiplicities() {
-        let strings = vec![
+        let strings = [
             "ACTGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATC",
             "GATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGA",
         ];
@@ -363,7 +370,7 @@ ATGCTGGGGGGGACACACA
 
     #[test]
     fn test_bcalm2_circularised_multiplicities() {
-        let strings = vec![
+        let strings = [
             "ACTGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCACTGATCGATCGA",
             "GATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGATCGAGATCGATCGATCG",
         ];
