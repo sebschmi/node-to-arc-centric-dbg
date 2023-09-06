@@ -63,7 +63,11 @@ fn node_to_arc_centric_dbg(
     let mut sequence_store = DefaultSequenceStore::<DnaAlphabet>::new();
     let graph: PetBCalm2EdgeGraph<_> =
         read_bigraph_from_bcalm2_as_edge_centric(input, &mut sequence_store, k).unwrap();
-    info!("Finished graph reading");
+    info!(
+        "Finished graph reading: {} nodes and {} edges",
+        graph.node_count(),
+        graph.edge_count()
+    );
 
     meter.report();
 
