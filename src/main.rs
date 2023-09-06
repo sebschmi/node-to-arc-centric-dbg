@@ -19,10 +19,7 @@ use std::io::Write;
 use std::io::{BufRead, BufReader, BufWriter};
 use std::path::PathBuf;
 
-#[cfg(target_os = "linux")]
 mod memory_meter;
-#[cfg(not(target_os = "linux"))]
-mod memory_meter_dummy;
 
 #[derive(Parser, Debug)]
 struct Cli {
