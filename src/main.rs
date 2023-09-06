@@ -53,11 +53,15 @@ pub fn initialise_logging(log_level: LevelFilter) {
     info!("Logging initialised successfully");
 }
 
-fn node_to_arc_centric_dbg(
+pub fn node_to_arc_centric_dbg(k: usize, input: &mut impl BufRead, output: &mut impl Write) {
+    node_to_arc_centric_dbg_with_memory_meter(k, input, output, None)
+}
+
+fn node_to_arc_centric_dbg_with_memory_meter(
     k: usize,
     input: &mut impl BufRead,
     output: &mut impl Write,
-    meter: &mut MemoryMeter,
+    meter: Option<&mut MemoryMeter>,
 ) {
     info!("Reading graph");
     let mut sequence_store = DefaultSequenceStore::<DnaAlphabet>::new();
@@ -69,7 +73,9 @@ fn node_to_arc_centric_dbg(
         graph.edge_count()
     );
 
-    meter.report();
+    if let Some(meter) = meter {
+        meter.report();
+    }
 
     info!("Writing graph...");
     output_arc_centric_dbg(&graph, &sequence_store, k, output);
@@ -182,7 +188,7 @@ fn main() {
     );
     let mut input = BufReader::new(File::open(&cli.input).unwrap());
     let mut output = BufWriter::new(File::create(&cli.output).unwrap());
-    node_to_arc_centric_dbg(cli.k, &mut input, &mut output, &mut meter);
+    node_to_arc_centric_dbg_with_memory_meter(cli.k, &mut input, &mut output, Some(&mut meter));
 
     meter.report();
 
